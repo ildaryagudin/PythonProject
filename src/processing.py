@@ -1,4 +1,4 @@
-def filter_by_state(data_list, state='EXECUTED'):
+def filter_by_state(data_list: list, state='EXECUTED') -> list:
     """
     Фильтрует список словарей по значению ключа 'state'.
 
@@ -12,7 +12,7 @@ def filter_by_state(data_list, state='EXECUTED'):
 from datetime import datetime
 
 
-def sort_by_date(data_list, reverse=True):
+def sort_by_date(data_list: list, reverse=True) -> list:
     """
     Сортирует список словарей по дате ('date'), с поддержкой обработки возможных ошибок преобразования даты.
 
