@@ -1,12 +1,12 @@
-def filter_by_state(data_list: list, state='EXECUTED') -> list:
+def filter_by_state(transactions_list, state='EXECUTED'):
     """
-    Фильтрует список словарей по значению ключа 'state'.
+    Фильтрует список транзакций по значению поля 'state'.
 
-    :param data_list: Список словарей, каждый словарь содержит ключи и значения.
-    :param state: Значение фильтра по ключу 'state'. По умолчанию — 'EXECUTED'.
-    :return: Новый список словарей, соответствующий фильтру.
+    :param transactions_list: Список словарей-транзакций.
+    :param state: Целевое значение поля 'state' (по умолчанию 'EXECUTED').
+    :return: Список словарей, у которых поле 'state' соответствует указанному значению.
     """
-    return [item for item in data_list if item.get('state') == state]
+    return [trans for trans in transactions_list if trans['state'] == state]
 
 
 from datetime import datetime
@@ -20,13 +20,12 @@ def sort_by_date(data_list: list, reverse=True) -> list:
     :param reverse: Направление сортировки (True — по убыванию, False — по возрастанию), по умолчанию True.
     :return: Отсортированный список словарей.
     """
+    # Сначала удалим записи, в которых нет ключа 'date'
+    valid_data = [entry for entry in data_list if 'date' in entry]
+
     try:
-        # Используем лямбду-функцию внутри sorted()
-        sorted_data = sorted(
-            data_list,
-            key=lambda x: datetime.fromisoformat(x['date']),
-            reverse=reverse
-        )
+        # Теперь сортируем оставшиеся записи
+        sorted_data = sorted(valid_data, key=lambda x: datetime.fromisoformat(x['date']), reverse=reverse)
         return sorted_data
     except ValueError as e:
         print(f"Ошибка при парсинге даты: {e}")
