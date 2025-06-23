@@ -1,4 +1,6 @@
 def filter_by_currency(transactions, currency_code):
+    """Принимает на вход список словарей, представляющих транзакции и возвращает итератор,
+    который поочередно выдает транзакции, где валюта операции соответствует заданной."""
     return (
         transaction
         for transaction in transactions
