@@ -8,6 +8,23 @@ logger = logging.getLogger("FunctionLogger")
 
 
 def log(filename=None):
+    """
+    Декоратор для логирования функций с возможностью записи в файл.
+
+    Параметры:
+        filename (str, optional): Путь к файлу журнала. Если указан, журнал будет записан в этот файл,
+                                 иначе выводится в стандартный поток вывода.
+
+    Примеры использования:
+        >>> @log('my_log.txt')
+        ... def my_function():
+        ...     pass
+
+        >>> @log()
+        ... def another_function():
+        ...     pass
+    """
+
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -39,6 +56,8 @@ def log(filename=None):
                 # Удаляем обработчик файлового логирования, если использовался
                 if filename is not None:
                     logger.removeHandler(handler)
+
+            return result  # Возвращаем результат работы функции
 
         return wrapper
 
