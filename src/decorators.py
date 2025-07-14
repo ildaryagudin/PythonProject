@@ -44,6 +44,7 @@ def log(filename=None):
             except Exception as e:
                 # Логируем ошибку вместе с параметрами
                 message = f"{func.__name__} error: {type(e).__name__}. Inputs: {args}, {kwargs}"
+                result = None
 
             finally:
                 # Выполняем запись в файл или вывод в консоль
