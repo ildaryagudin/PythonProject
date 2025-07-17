@@ -1,8 +1,8 @@
 import unittest
 from unittest.mock import patch, MagicMock
 from pathlib import Path
-from utils import load_transactions
-from external_api import transaction_amount_in_rubles, convert_to_rubles
+from src.utils import load_transactions
+from src.external_api import transaction_amount_in_rubles, convert_to_rubles
 
 
 class TestUtils(unittest.TestCase):
