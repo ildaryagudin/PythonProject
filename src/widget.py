@@ -1,22 +1,20 @@
-def get_mask_card_number(card_number: str) -> str:
-    """Функция принимает на вход номер карты и возвращает ее маску"""
-    if len(card_number) != 16 or not card_number.isdigit():
-        raise ValueError("Неверный формат номера карты")
-
-    masked_part = '****' * 2  # генерируем две группы звездочек
-    return f"{card_number[:4]} {card_number[4:6]}** {masked_part} {card_number[-4:]}"
+from src.masks import get_mask_account, get_mask_card_number
 
 
-def mask_account_card(card_account: str) -> str:
-    """Функция получает номер счета и выводит ** с последними 4мя цифрами"""
-    card_account = card_account.replace(" ", "")
-    print(len(card_account))
-    if len(card_account) != 20 and not card_account.isdigit():
-        return "Неверное количество или значение цифр"
-    last_part = str(card_account[-4:])
-    return f"**{last_part}"
+def mask_account_card(card_or_account_number: str) -> str:
+    """
+    Функция обработки информацию
+    о картах и счетах
+    """
+    if "Счет" in card_or_account_number:
+        number = card_or_account_number.replace("Счет", "").strip()
+        return "Счет " + get_mask_account(number)
+    else:
+        number = get_mask_card_number(card_or_account_number[-16:])
+        updated_card_number = " ".join(card_or_account_number.split()[:-1]) + " " + number
+        return updated_card_number
 
-
+print(mask_account_card('Maestro 1596837868705199'))
 import re
 
 
