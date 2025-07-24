@@ -1,45 +1,61 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from pathlib import Path
 from src.utils import load_transactions
-from src.external_api import transaction_amount_in_rubles, convert_to_rubles
+import pandas as pd
+import json
+import os
 
+class TestLoadTransactions(unittest.TestCase):
+    def setUp(self):
+        self.test_data = [
+            {"id": 1, "amount": 100},
+            {"id": 2, "amount": 200}
+        ]
 
-class TestUtils(unittest.TestCase):
-    def test_load_valid_json(self):
-        with patch.object(Path, 'open', create=True) as mock_open:
-            mock_file = MagicMock()
-            mock_file.read.return_value = '[{"id": 1, "amount": 100}]'
-            mock_open.return_value.__enter__.return_value = mock_file
+    @patch("main.open")
+    def test_load_from_json(self, mock_open):
+        mock_file = MagicMock()
+        mock_file.__enter__.return_value.read.return_value = json.dumps(self.test_data)
+        mock_open.return_value = mock_file
+        result = load_transactions("mocked.json", "json")
+        self.assertEqual(result, self.test_data)
 
-            result = load_transactions('test.json')
-            self.assertEqual(result, [{'id': 1, 'amount': 100}])
+    @patch("pandas.read_csv")
+    def test_load_from_csv(self, mock_read_csv):
+        mock_df = pd.DataFrame(self.test_data)
+        mock_read_csv.return_value = mock_df
+        result = load_transactions("mocked.csv", "csv")
+        self.assertEqual(result, self.test_data)
 
-    def test_load_invalid_json(self):
-        with patch.object(Path, 'open', create=True) as mock_open:
-            mock_file = MagicMock()
-            mock_file.read.return_value = '{"invalid": true}'
-            mock_open.return_value.__enter__.return_value = mock_file
+    @patch("pandas.read_excel")
+    def test_load_from_excel(self, mock_read_excel):
+        mock_df = pd.DataFrame(self.test_data)
+        mock_read_excel.return_value = mock_df
+        result = load_transactions("mocked.xlsx", "xlsx")
+        self.assertEqual(result, self.test_data)
 
-            result = load_transactions('test.json')
-            self.assertEqual(result, [])
+    @patch("main.open", side_effect=FileNotFoundError())
+    def test_nonexistent_file(self, _):
+        result = load_transactions("nonexistent.json", "json")
+        self.assertEqual(result, [])
 
-    @patch('requests.get')
-    def test_convert_usd_to_rubles(self, mock_get):
-        mock_response = MagicMock()
-        mock_response.json.return_value = {'rates': {'RUB': 75}}
-        mock_get.return_value = mock_response
+    @patch("main.open")
+    def test_invalid_json_format(self, mock_open):
+        mock_file = MagicMock()
+        mock_file.__enter__.return_value.read.return_value = "{invalid json}"
+        mock_open.return_value = mock_file
+        result = load_transactions("invalid.json", "json")
+        self.assertEqual(result, [])
 
-        result = convert_to_rubles(100, 'USD')
-        self.assertAlmostEqual(result, 7500)
+    def test_automatic_detection(self):
+        for extension in ["json", "csv", "xlsx"]:
+            path = f"autodetect.{extension}"
+            result = load_transactions(path)
+            self.assertIsInstance(result, list)
 
-    def test_transaction_amount_in_rubles(self):
-        transaction = {"amount": 100, "currency": "USD"}
-        expected_result = 7500  # Предполагается, что курс 1 USD = 75 RUB
-        with patch('external_api.convert_to_rubles', return_value=expected_result):
-            result = transaction_amount_in_rubles(transaction)
-            self.assertEqual(result, expected_result)
+    def test_unsupported_filetype(self):
+        result = load_transactions("unsupported.filetype", "unknown")
+        self.assertEqual(result, [])
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
