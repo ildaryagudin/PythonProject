@@ -66,3 +66,41 @@ def load_transactions(file_path: str, file_type: str = None) -> List[Dict]:
     except Exception as e:
         logger.error(f'Ошибка при обработке файла {file_path}: {str(e)}')
         return []
+
+
+import re
+
+
+def process_bank_search(data: list[dict], search: str) -> list[dict]:
+    """
+    Поиск операций, содержащих заданную строку в описании.
+
+    :param data: Список словарей с операциями
+    :param search: Строка поиска
+    :return: Фильтрованный список словарей
+    """
+    # Регулярное выражение для поиска чувствительно к регистру
+    pattern = re.compile(re.escape(search), re.IGNORECASE)
+    return [
+        item for item in data if 'description' in item and pattern.search(item['description'])
+    ]
+
+
+from collections import defaultdict
+
+
+def process_bank_operations(data: list[dict], categories: list[str]) -> dict:
+    """
+    Подсчет количества операций по категориям.
+
+    :param data: Список словарей с операциями
+    :param categories: Список возможных категорий операций
+    :return: Словарь {категория: количество}
+    """
+    result = defaultdict(int)
+    for operation in data:
+        description = operation.get('description', '')
+        for category in categories:
+            if category.lower() in description.lower():
+                result[category] += 1
+    return dict(result)
